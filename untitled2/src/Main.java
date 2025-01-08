@@ -1,11 +1,12 @@
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
+
 public class Main {
     public static void main(String[] args) {
-        // уник
+        // Создаем уник
         Institution institution = new Institution("Astana IT University", "Mangilik El, C1.4");
 
-        // студенты
+        // Добавляем студентовч
         Student student1 = new Student(1, "Kanat Kanatov", 19, "A", "kanatkanatov@gmail.com");
         Student student2 = new Student(2, "Dauren Nagumash", 17, "D", "nahumsw228@gmail.com");
         institution.addStudent(student1);
@@ -17,122 +18,110 @@ public class Main {
         institution.addTeacher(teacher1);
         institution.addTeacher(teacher2);
 
-        // Выводим информацию
+        // Выводим сводку
         institution.getSummary();
+
+        // Пример фильтрации студентов по оценке
+        System.out.println("\nStudents with grade A:");
+        List<Student> filteredStudents = institution.filterStudentsByGrade("A");
+        filteredStudents.forEach(System.out::println);
+
+        // Пример сортировки преподавателей по опыту
+        System.out.println("\nTeachers sorted by experience:");
+        List<Teacher> sortedTeachers = institution.sortTeachersByExperience();
+        sortedTeachers.forEach(System.out::println);
     }
 }
 
-class Student {
+class Person {
     private int id;
     private String name;
-    private int age;
-    private String grade;
     private String email;
 
-    public Student(int id, String name, int age, String grade, String email) {
+    public Person(int id, String name, String email) {
         this.id = id;
         this.name = name;
-        this.age = age;
-        this.grade = grade;
         this.email = email;
     }
 
-    // Геттеры и сеттеры
     public int getId() {
         return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
     }
 
     public String getName() {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public String getEmail() {
+        return email;
+    }
+
+    @Override
+    public String toString() {
+        return "Person{id=" + id + ", name='" + name + "', email='" + email + "'}";
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        Person person = (Person) obj;
+        return id == person.id && name.equals(person.name);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name);
+    }
+}
+
+class Student extends Person {
+    private int age;
+    private String grade;
+
+    public Student(int id, String name, int age, String grade, String email) {
+        super(id, name, email);
+        this.age = age;
+        this.grade = grade;
     }
 
     public int getAge() {
         return age;
     }
 
-    public void setAge(int age) {
-        this.age = age;
-    }
-
     public String getGrade() {
         return grade;
     }
 
-    public void setGrade(String grade) {
-        this.grade = grade;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
+    @Override
+    public String toString() {
+        return "Student{id=" + getId() + ", name='" + getName() + "', age=" + age +
+                ", grade='" + grade + "', email='" + getEmail() + "'}";
     }
 }
 
-class Teacher {
-    private int id;
-    private String name;
+class Teacher extends Person {
     private String subject;
     private int experience;
-    private String email;
 
     public Teacher(int id, String name, String subject, int experience, String email) {
-        this.id = id;
-        this.name = name;
+        super(id, name, email);
         this.subject = subject;
         this.experience = experience;
-        this.email = email;
-    }
-
-    // Геттеры и сеттеры
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
     }
 
     public String getSubject() {
         return subject;
     }
 
-    public void setSubject(String subject) {
-        this.subject = subject;
-    }
-
     public int getExperience() {
         return experience;
     }
 
-    public void setExperience(int experience) {
-        this.experience = experience;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
+    @Override
+    public String toString() {
+        return "Teacher{id=" + getId() + ", name='" + getName() + "', subject='" +
+                subject + "', experience=" + experience + " years, email='" + getEmail() + "'}";
     }
 }
 
@@ -157,17 +146,26 @@ class Institution {
         teachers.add(teacher);
     }
 
+    public List<Student> filterStudentsByGrade(String grade) {
+        return students.stream()
+                .filter(student -> student.getGrade().equalsIgnoreCase(grade))
+                .collect(Collectors.toList());
+    }
+
+    public List<Teacher> sortTeachersByExperience() {
+        return teachers.stream()
+                .sorted(Comparator.comparingInt(Teacher::getExperience).reversed())
+                .collect(Collectors.toList());
+    }
+
     public void getSummary() {
-        System.out.println("University: " + name);
+        System.out.println("Institution: " + name);
         System.out.println("Location: " + location);
+
         System.out.println("\nStudents:");
-        for (Student student : students) {
-            System.out.println("- " + student.getName() + " (Grade: " + student.getGrade() + ")");
-        }
+        students.forEach(System.out::println);
 
         System.out.println("\nTeachers:");
-        for (Teacher teacher : teachers) {
-            System.out.println("- " + teacher.getName() + " (Subject: " + teacher.getSubject() + ")");
-        }
+        teachers.forEach(System.out::println);
     }
 }
